@@ -118,8 +118,15 @@ async function CardFacturacion(comprobante: OSF_PEDIDOS) {
 }
 
 async function CardComentarios({ comentarios }: { comentarios: string }) {
-    const data = JSON.parse(comentarios)
+    let data;
 
+    try {
+        data = JSON.parse(comentarios);
+        if (!Array.isArray(data)) throw new Error('El JSON no es un array');
+    } catch (error) {
+        console.error('Formato JSON inválido:', error);
+        return null; // O puedes renderizar un mensaje de error
+    }
     return (
         <Card>
             <CardHeader>
@@ -222,6 +229,22 @@ async function HomeOrden({ params }: Props) {
     const situacion_pagos = ordenes.situacion_pagos[0]
     const situacion_envio = ordenes.situacion_envio[0]
     const situacion_facturacion = ordenes.situacion_facturacion[0]
+    // "situacion_facturacion": [
+    //     {
+    //         "estado_facturacion": "pendiente",
+    //         "fecha_envio_facturacion": "",
+    //         "link_doc1": "[{\"comentario\":\"Cambio por prenda fallada\",\"tipo\":\"cambio\",\"fecha\":\"Tue Oct 01 2024 15:21:18 \",\"usuario\":\"admin\"}]",
+    //         "link_doc2": ""
+    //     }
+    // ],
+    // "situacion_facturacion": [
+    //     {
+    //         "estado_facturacion": "BW17-27232",
+    //         "fecha_envio_facturacion": "2024-09-29T11:28:47.000Z",
+    //         "link_doc1": "http://ec2-52-26-118-179.us-west-2.compute.amazonaws.com/files/x%275A556573616D42526B6470366A45796152626B4A362B6B735343363571674B7A376E3542657659334B5072586A4C3463656D2B682B477A557A48486633616156%27",
+    //         "link_doc2": ""
+    //     }
+    // ],
 
     const comprobante: OSF_PEDIDOS | null = await fetchingPaymentDocument(orden)
     let direccionMaps = `https://www.google.com.pe/maps/search/${datos_envio.servicio_envio !== "programado" ? 'KAYSER' : ''} ${datos_envio.direccion_envio}+${datos_envio.distrito}+${datos_envio.provincia}+${datos_envio.departamento}+peru`
